@@ -65,6 +65,7 @@ struct filevars {
 /* Global vars */
 struct hashtable *gtemplates;
 int grebuild; /* indicates whether to rebuild the whole output */
+int gnumfiles, gnumchanged, gnumnew;
 
 void panic(char *fmt, ...)
 {
@@ -175,7 +176,7 @@ void processfile(char *filename, FILE *out)
     panic("cannot open file %s", filename);
   
   if (st.st_size == 0) {
-    printf("(skipping zero-length file) ");
+    //printf("(skipping zero-length file) ");
     close(fd);
     return;
   }
@@ -321,16 +322,20 @@ void processcontent(char *path, char *outpath)
       processcontent(fullpath, fulloutpath);
       continue;
     }
-    
+
+    gnumfiles++;
     isick = ickfile(fulloutpath);
     stat(fullpath, &stin);
-
     outexists = (stat(fulloutpath, &stout) == 0);
     if (!grebuild &&  outexists
         && stin.st_mtime == stout.st_mtime) {
       printf("=  %s\n", fullpath); /* not changed */
       continue;
     }
+    if (outexists)
+      gnumchanged++;
+    else
+      gnumnew++;
   		
     if (isick) {
       // Process ick file
@@ -372,6 +377,7 @@ void closetemplate(void *tpl)
 
 void main(int argc, char *argv[])
 {  
+  gnumfiles = gnumchanged = gnumnew = 0;
   grebuild = 0;
   
   if (argc > 1 && strcmp(argv[1], "rebuild") == 0)
@@ -388,8 +394,9 @@ void main(int argc, char *argv[])
 
   gettimeofday(&tp, NULL);
   end = tp.tv_sec + tp.tv_usec/1E6;
-  
-  printf("Done in %0.3f sec\n", end-start);
+ 
+  printf("\nDone in %0.3f sec\n", end-start);
+  printf("%d files, %d new, %d modified\n\n", gnumfiles, gnumnew, gnumchanged);
   
   //for (int i=1; i < argc; i++)
   //  processfile(argv[i], gtemplates, stdout);

@@ -29,6 +29,7 @@
 #include <copyfile.h>
 
 #include "hashtable.h"
+#include "markup.h"
 
 /* Global constants */
 #define TEMPLATES_DIR "templates"
@@ -221,7 +222,8 @@ void processfile(char *filename, FILE *out)
   for (int i=0; i < tpl->varnum; i++) {
 
     if (strcmp(tpl->varnames[i], VAR_CONTENT) == 0)
-      fwrite(buf, st.st_size, 1, out); /* write content */
+      //fwrite(buf, st.st_size, 1, out); /* write content */
+      markup(buf, st.st_size, out);
 
     v = findfilevar(tpl->varnames[i], &fvars);
     if (v != -1)
@@ -243,7 +245,6 @@ void processfile(char *filename, FILE *out)
       fprintf(out, "%s", tpl->varplaces[i]);
     } else {/* write remaining bytes. cannot fprintf, as buf doesn't end with 0. */
       size_t rem = tpl->len - (tpl->varplaces[i] - tpl->buf);
-      printf("rem = %d\n", rem);
       fwrite(tpl->varplaces[i], rem, 1, out);
     }
   }  

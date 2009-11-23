@@ -1,5 +1,5 @@
 all:
-	cc -Os -Wall main.c hashtable.c -o ick
+	cc -Os -Wall main.c hashtable.c markup.c -o ick
 
 clean:
 	rm ick

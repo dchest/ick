@@ -13,9 +13,9 @@ ick is a site generator written in C.
 <h2>Content Format</h2>
 
 Files from content directory are just copied to output unless they have
-<i>.ick</i> extension. In this case, they are processed by ick. After 
-processing, .ick extension is removed. For example, if you want <i>index.html</i>
-file in your output directory, name content file <i>index.html.ick</i>.
+_.ick_ extension. [In this case](http://www.codingrobots.com), they are processed by ick. After 
+processing, .ick extension is removed. For example, if you want _index.html_
+file in your output directory, name content file _index.html.ick_.
 
 <pre><code>
 =variable1 value1
@@ -26,28 +26,28 @@ content
 
 <h3>Predefined variables</h3>
 
-<b>In content files:</b>
+*In content files:*
 
-<p><code>template</code> -- use specified template file from templates directory 
+`template` -- use specified template file from templates directory 
 		   (example: =template custom.html)
 
-<p><b>In template files</b>
-	
-<p><code>content</code> -- output processed content of file.
+*In template files:*
+
+`content` -- output processed content of file.
 
 <h2>Template Format</h2>
 
-HTML format with variables (defined in content file):
+[HTML](http://w3c.com) format with variables (defined in content file):
 
-<p><code>{$variable}</code>
+`{$variable}`
 
-<p>also can check if variable is defined:
+also can check if variable is defined:
 
-<p><code>{$if variable}...{$endif}</code>
+`{$if variable}...{$endif}`
 
 <h2>Examples</h2>
 	
-<p>Content file <b>content/index.html.ick</b>:
+Content file *content/index.html.ick*:
 
 <pre><code>
 =title  Welcome to my page!
@@ -56,7 +56,7 @@ HTML format with variables (defined in content file):
 Hello, this is &lt;b>my&lt;/b> page.
 </code></pre>
 
-<p>Template <b>templates/default.html</b>:
+Template *templates/default.html*:
 
 <pre><code>
 &lt;html>
@@ -70,7 +70,4 @@ Hello, this is &lt;b>my&lt;/b> page.
 &lt;/html>
 </code></pre>
 
-
-
-
-<p>(You cannot nest if's)
+(You cannot nest if's)

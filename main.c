@@ -14,11 +14,14 @@ struct template {
   size_t len; /* Size of buf */
   char *buf;  /* Buffer with contents */
   /* Variables */
-  char *var_content_place;
+  //char *var_content_place;
+  char *varnames[100]; // stack of pointers to names of variables
+  char *varplaces[100]; // stack of pointers to places after variables
+  int varnum;
 };
 
-char *var_content_name = "content";
-size_t var_content_size = 7;
+//char *var_content_name = "content";
+//size_t var_content_size = 7;
 
 void panic(char *fmt, ...)
 {
@@ -35,6 +38,7 @@ void readtemplate(const char *filename, struct template *tpl)
 {
   struct stat st;
   char *curvar;
+  tpl->varnum = 0;
   
   tpl->fd = open(filename, O_RDONLY);
   if (tpl->fd < 0 || fstat(tpl->fd, &st))
@@ -55,11 +59,12 @@ void readtemplate(const char *filename, struct template *tpl)
           panic("malformed template (%s): variable is not closed", filename);
       }
       buf[i-1] = '\0';
-      //printf("curvar: %s\n", curvar);
-      if (strcmp(curvar, var_content_name) == 0) {
-        tpl->var_content_place = (char *)buf+i;
-      } else {
-        panic("no content variable");
+      tpl->varnames[tpl->varnum] = curvar;
+      tpl->varplaces[tpl->varnum] = (char *)buf+i;
+      tpl->varnum++;
+      if (tpl->varnum > sizeof(tpl->varnames)) {
+        panic("too many (%d) variables (more than %d) in template %s",
+          tpl->varnum, sizeof(tpl->varnames), filename);
       }
     }
   }
@@ -79,12 +84,16 @@ void processfile(char *filename, struct template *tpl, FILE *out)
   if (buf == MAP_FAILED)
     panic("mmap on file (%s) failed", filename);
   
+  /* write up to variables */
   fprintf(out, "%s", tpl->buf);
-  /* out content */
-  fwrite(buf, st.st_size, 1, out);
-  /* out after content */
-  fprintf(out, "%s", tpl->var_content_place);
-  
+  for (int i=0; i < tpl->varnum; i++) {
+    if (strcmp(tpl->varnames[i], "content") == 0)
+      fwrite(buf, st.st_size, 1, out); /* write content */
+    else if (strcmp(tpl->varnames[i], "title") == 0)
+      fprintf(out, "YES, TITLES WORK");
+    /* write after var */
+    fprintf(out, "%s", tpl->varplaces[i]);
+  }  
   close(fd);
 }
 

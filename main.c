@@ -137,10 +137,19 @@ void processfile(char *filename, struct template *tpl, FILE *out)
     }
   }
   buf = buf+i;
+  
+  int v;
+  
+  v = findfilevar("template", &fvars);
+  if (v != -1) {
+    /* Use custom template */
+    struct template custom_tpl;
+    readtemplate(fvars.values[v], &custom_tpl);
+    tpl = &custom_tpl;
+  }
     
   /* Output */
   fprintf(out, "%s", tpl->buf); /* write up to first variable */
-  int v;
   for (int i=0; i < tpl->varnum; i++) {
 
     if (strcmp(tpl->varnames[i], "content") == 0)

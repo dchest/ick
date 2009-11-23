@@ -1,3 +1,21 @@
+/* ick - stupid (but fast) static site generator
+**
+** Copyright 2009 Dmitry Chestnykh <dmitry@codingrobots.com>
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**    http://www.apache.org/licenses/LICENSE-2.0
+
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+**
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -157,14 +175,15 @@ void processfile(char *filename, FILE *out)
   if (v != -1) {
     /* Use custom template */
     //TODO: load from list of templates, don't read it here
-    printf("using custom template");
     tpl = (struct template *)hashtable_search(gtemplates, fvars.values[v]);
+    if (!tpl)
+      panic("unknown template '%s' in file '%s'", fvars.values[v], filename);
   } else {
     // Use default template
     tpl = (struct template *)hashtable_search(gtemplates, 
                                               DEFAULT_TEMPLATE_FILENAME);
     if (!tpl)
-      panic("no default template");
+      panic("no default template (file %s)", filename);
   }
     
   /* Output */
@@ -215,7 +234,7 @@ struct hashtable *gettemplates(char *path)
     snprintf(fullpath, PATH_MAX, "%s/%s", path, ent->d_name);
     tpl = malloc(sizeof(struct template));
     readtemplate(fullpath, tpl);
-    hashtable_insert(ht, ent->d_name, tpl);
+    hashtable_insert(ht, strdup(ent->d_name), tpl);
   }
   closedir(dir);
   return ht;
@@ -262,9 +281,7 @@ void closetemplate(void *tpl)
 }
 
 void main(int argc, char *argv[])
-{
-  struct template default_tpl;
-  
+{  
   //if (argc < 2)
   //  panic("Use: %s <filenames>", argv[0]);
   

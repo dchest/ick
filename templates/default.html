@@ -7,10 +7,8 @@
 </head>
 
 <body>
+<h1>{$title}{$if description} &mdash; {$description}{$endif}</h1>
 {$content}
 </body>
-{$nosuchvar}
-
-{$if title}<b>Here's title again: {$title}!</b>{$endif}
 
 </html>

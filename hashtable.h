@@ -33,10 +33,15 @@ void hashtable_destroy(struct hashtable *h, int free_values);
 /* Private */
 unsigned int hash(struct hashtable *h, void *k);
 
+//static inline unsigned int
+//indexFor(unsigned int tablelength, unsigned int hashvalue) {
+//    return (hashvalue % tablelength);
+//};
 static inline unsigned int
-indexFor(unsigned int tablelength, unsigned int hashvalue) {
-    return (hashvalue % tablelength);
-};
+indexFor(unsigned int tablelength, unsigned int hashvalue)
+{
+    return (hashvalue & (tablelength - 1u));
+}
 
 #define freekey(X) free(X)
 

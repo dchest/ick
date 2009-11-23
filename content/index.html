@@ -1,10 +1,32 @@
-=breadcrumbs true
-=title 	This is a page
-=description My description is so cool
+=title ick
+=description Stupid (but fast) static site generator written in C
 =date 	2009-11-23
 
-<div>
-This is *markdown*[id:name]
-</div>
+ick is a site generator written in C.
 
-[Do you Yahoo?](http://yahoo.com)
+<h2>Directory Structure</h2>
+
+	<li>content
+	<li>templates 
+	<li>output (will be created)
+
+<h2>Content Format</h2>
+
+<pre><code>
+=variable1 value1
+=variable2 value2
+
+content
+</code></pre>
+
+<h2>Template Format</h2>
+
+HTML format with variables (defined in content file):
+
+<p><code>{$variable}</code>
+
+<p>also can check if variable is defined:
+
+<p><code>{$if variable}...{$endif}</code>
+
+<p>(You cannot nest if's)

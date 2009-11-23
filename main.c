@@ -26,7 +26,10 @@
 #include <stdarg.h>
 #include <dirent.h>
 #include <limits.h>
+#ifdef __APPLE__
 #include <copyfile.h>
+#endif
+#include <sys/time.h>
 
 #include "hashtable.h"
 #include "markup.h"
@@ -314,6 +317,7 @@ void processcontent(char *path, char *outpath)
       if (!f)
         panic("cannot open file %s for write", fulloutpath);
       processfile(fullpath, f);
+      printf("* %s\n", fullpath);
       fclose(f);
     } else {
       // Just copy file
@@ -321,6 +325,7 @@ void processcontent(char *path, char *outpath)
       int flags = COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC;
     	if (copyfile(fullpath, fulloutpath, NULL, flags) != 0)
         panic("cannot copy file %s to %s", fullpath, fulloutpath);
+      printf("> %s\n", fullpath);
       #else
       panic("copy is not yet implemented for this platform");
       #endif
@@ -339,9 +344,19 @@ void main(int argc, char *argv[])
 {  
   //if (argc < 2)
   //  panic("Use: %s <filenames>", argv[0]);
+  struct timeval tp;
+  double start, end;
+
+  gettimeofday(&tp, NULL);
+  start = tp.tv_sec + tp.tv_usec/1E6;
   
   gtemplates = gettemplates(TEMPLATES_DIR);
   processcontent(CONTENT_DIR, OUTPUT_DIR);
+
+  gettimeofday(&tp, NULL);
+  end = tp.tv_sec + tp.tv_usec/1E6;
+  
+  printf("Done in %0.3f sec\n", end-start);
   
   //for (int i=1; i < argc; i++)
   //  processfile(argv[i], gtemplates, stdout);

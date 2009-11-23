@@ -60,6 +60,8 @@ also can check if variable is defined:
 
 `{$if variable}...{$endif}`
 
+Nested `if`'s are not allowed.
+
 <h2>Examples</h2>
 	
 Content file *content/index.html.ick*:
@@ -84,5 +86,3 @@ Template *templates/default.html*:
 &lt;/body>
 &lt;/html>
 </code></pre>
-
-(You cannot nest if's)

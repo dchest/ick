@@ -102,6 +102,10 @@ void markup(char *buf, size_t len, FILE *out)
       }
       if (inblock < 0) inblock = 0; /* just in case */
       if (inpre < 0) inpre = 0;
+      if (paragraph && inblock) {
+        fprintf(out, "</p>");
+        paragraph = 0;
+      }
       break;
     case '>':
       intag = 0;
@@ -116,7 +120,7 @@ void markup(char *buf, size_t len, FILE *out)
         case '_': tag = "i"; break;
         case '`': tag = "code"; break;
       }
-      if (!intag) {
+      if (!intag && !inpre) {
         int wrote = 0;
         for (int j=i+1; j<len; j++) {
           if (buf[j] == '\n')
@@ -172,6 +176,8 @@ void markup(char *buf, size_t len, FILE *out)
     }
     fwrite(buf+i, 1, 1, out);
   }
-  if (paragraph)
+  if (paragraph) {
     fprintf(out, "</p>");
+    paragraph = 0;
+  }
 }

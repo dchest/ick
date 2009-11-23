@@ -29,11 +29,26 @@ content
 *In content files:*
 
 `template` -- use specified template file from templates directory 
-		   (example: =template custom.html)
+		   (example: =template custom.html).
+		
+`markup` -- set to `none` to disable markup.
 
 *In template files:*
 
 `content` -- output processed content of file.
+
+<h3>Horrible Markup Language</h3>
+
+Content by default processed via built-in Horrible Markup Language.
+
+Rules are:
+<pre><code>
+Emphasis: *bold*, _italic_, `code`
+Links: [link text](http://example.com)
+New paragraph = double linefeed.
+</code></pre>
+Currently there's no nested markup (i.e. no links inside `*bold*`, etc.)
+
 
 <h2>Template Format</h2>
 
@@ -53,7 +68,7 @@ Content file *content/index.html.ick*:
 =title  Welcome to my page!
 =author John Doe
 
-Hello, this is &lt;b>my&lt;/b> page.
+Hello, this is *my* page.
 </code></pre>
 
 Template *templates/default.html*:

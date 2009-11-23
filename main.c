@@ -39,6 +39,8 @@
 /* Predefined variables for templates */
 #define VAR_TEMPLATE "template"
 #define VAR_CONTENT  "content"
+#define VAR_MARKUP  "markup"
+#define VAR_VALUE_NONE  "none"
 
 struct template {
   int fd;     /* File descriptor */
@@ -161,6 +163,7 @@ void processfile(char *filename, FILE *out)
   int skip = 0;
   struct filevars fvars;
   struct template *tpl;
+  int nomarkup = 0;
     
   fd = open(filename, O_RDONLY);
   if (fd < 0 || fstat(fd, &st))
@@ -216,14 +219,25 @@ void processfile(char *filename, FILE *out)
     if (!tpl)
       panic("no default template (file %s)", filename);
   }
+  
+  v = findfilevar(VAR_MARKUP, &fvars);
+  if (v != -1) {
+    if (strcmp(fvars.values[v], VAR_VALUE_NONE) == 0)
+      nomarkup = 1;
+    else
+      panic("Unknown markup '%s' in file %s", fvars.values[v], filename);
+  }
     
   /* Output */
   fprintf(out, "%s", tpl->buf); /* write up to first variable */
   for (int i=0; i < tpl->varnum; i++) {
 
-    if (strcmp(tpl->varnames[i], VAR_CONTENT) == 0)
-      //fwrite(buf, st.st_size, 1, out); /* write content */
-      markup(buf, st.st_size, out);
+    if (strcmp(tpl->varnames[i], VAR_CONTENT) == 0) {
+      if (nomarkup)
+        fwrite(buf, st.st_size, 1, out); /* write content */
+      else
+        markup(buf, st.st_size, out);
+    }
 
     v = findfilevar(tpl->varnames[i], &fvars);
     if (v != -1)

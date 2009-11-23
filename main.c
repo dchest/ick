@@ -395,8 +395,8 @@ void main(int argc, char *argv[])
   gettimeofday(&tp, NULL);
   end = tp.tv_sec + tp.tv_usec/1E6;
  
-  printf("\nDone in %0.3f sec\n", end-start);
-  printf("%d files, %d new, %d modified\n\n", gnumfiles, gnumnew, gnumchanged);
+  printf("\n Done in %0.3f sec\n", end-start);
+  printf(" %d files, %d new, %d modified\n", gnumfiles, gnumnew, gnumchanged);
   
   //for (int i=1; i < argc; i++)
   //  processfile(argv[i], gtemplates, stdout);

@@ -117,12 +117,17 @@ void processfile(char *filename, struct template *tpl, FILE *out)
   int i;
   for (i = 0; i < st.st_size; i++) {
     if (buf[i] == '=') {
-      fvars.names[fvars.num] = (char *)buf+i+1;
-      while (buf[i++] != ' ') {
-        if (i == st.st_size)
-          panic("malformed file %s (varname after = required)", filename);
-      }
-      buf[i-1] = '\0';
+      i++;
+      fvars.names[fvars.num] = (char *)buf+i;
+      do {
+        if (i++ == st.st_size)
+          panic("malformed file %s (varname after = required)", filename);        
+      } while (buf[i] != ' ' && buf[i] != '\t');
+      buf[i] = '\0';
+      do {
+        if (i++ == st.st_size)
+          panic("malformed file %s (value after = required)", filename);
+      } while (buf[i] == ' ' || buf[i] == '\t');
       fvars.values[fvars.num] = (char *)buf+i;
       while (buf[++i] != '\n' && i < st.st_size) 
       /*nothing*/;
@@ -143,8 +148,9 @@ void processfile(char *filename, struct template *tpl, FILE *out)
   v = findfilevar("template", &fvars);
   if (v != -1) {
     /* Use custom template */
+    //TODO: load from list of templates, don't read it here
     struct template custom_tpl;
-    readtemplate(fvars.values[v], &custom_tpl);
+    readtemplate(fvars.values[v], &custom_tpl); 
     tpl = &custom_tpl;
   }
     

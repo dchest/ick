@@ -12,7 +12,8 @@
 #include "hashtable.h"
 
 /* Global constants */
-const char *templatefile = "template.html";
+#define TEMPLATES_DIR "templates"
+#define DEFAULT_TEMPLATE_FILENAME "default.html"
 
 struct template {
   int fd;     /* File descriptor */
@@ -159,7 +160,8 @@ void processfile(char *filename, struct hashtable *templates, FILE *out)
     tpl = (struct template *)hashtable_search(templates, fvars.values[v]);
   } else {
     // Use default template
-    tpl = (struct template *)hashtable_search(templates, "default.html");
+    tpl = (struct template *)hashtable_search(templates, 
+                                              DEFAULT_TEMPLATE_FILENAME);
     if (!tpl)
       panic("no default template");
   }
@@ -231,8 +233,7 @@ void main(int argc, char *argv[])
   if (argc < 2)
     panic("Use: %s <filenames>", argv[0]);
   
-  //readtemplate(templatefile, &default_tpl);
-  templates = gettemplates("templates");
+  templates = gettemplates(TEMPLATES_DIR);
   
   for (int i=1; i < argc; i++)
     processfile(argv[i], templates, stdout);

@@ -13,6 +13,8 @@
 
 /* Global constants */
 #define TEMPLATES_DIR "templates"
+#define CONTENT_DIR "content"
+#define OUTPUT_DIR "output"
 #define DEFAULT_TEMPLATE_FILENAME "default.html"
 
 struct template {
@@ -20,7 +22,6 @@ struct template {
   size_t len; /* Size of buf */
   char *buf;  /* Buffer with contents */
   /* Variables */
-  //char *var_content_place;
   char *varnames[100]; // stack of pointers to names of variables
   char *varplaces[100]; // stack of pointers to places after variables
   int varnum;
@@ -32,8 +33,8 @@ struct filevars {
   int num;
 };
 
-//char *var_content_name = "content";
-//size_t var_content_size = 7;
+/* Global vars */
+struct hashtable *gtemplates;
 
 void panic(char *fmt, ...)
 {
@@ -102,7 +103,7 @@ int findfilevar(char *var, struct filevars *fvars)
 }
 
 
-void processfile(char *filename, struct hashtable *templates, FILE *out)
+void processfile(char *filename, FILE *out)
 {
   int fd;
   char *buf;
@@ -157,10 +158,10 @@ void processfile(char *filename, struct hashtable *templates, FILE *out)
     /* Use custom template */
     //TODO: load from list of templates, don't read it here
     printf("using custom template");
-    tpl = (struct template *)hashtable_search(templates, fvars.values[v]);
+    tpl = (struct template *)hashtable_search(gtemplates, fvars.values[v]);
   } else {
     // Use default template
-    tpl = (struct template *)hashtable_search(templates, 
+    tpl = (struct template *)hashtable_search(gtemplates, 
                                               DEFAULT_TEMPLATE_FILENAME);
     if (!tpl)
       panic("no default template");
@@ -220,6 +221,41 @@ struct hashtable *gettemplates(char *path)
   return ht;
 }
 
+void processcontent(char *path, char *outpath)
+{
+  DIR *dir;
+  FILE *f;
+  struct dirent *ent;
+  char fullpath[PATH_MAX], fulloutpath[PATH_MAX];
+  struct template *tpl;
+  struct hashtable *ht = create_hashtable_m(53);
+
+  dir = opendir(path);
+  if (!dir)
+    panic("cannot open directory %s", path);
+
+  mkdir(outpath, 0755);
+  while ((ent = readdir(dir)) != NULL) {
+    if ((ent->d_name[0] == '.') && (ent->d_name[1] == '\0' ||
+       ((ent->d_name[1] == '.') && (ent->d_name[2] == '\0'))))
+       continue;
+    snprintf(fullpath, PATH_MAX, "%s/%s", path, ent->d_name);
+    snprintf(fulloutpath, PATH_MAX, "%s/%s", outpath, ent->d_name);
+    if (ent->d_type == DT_DIR) {
+      processcontent(fullpath, fulloutpath);
+      continue;
+    }
+
+    f = fopen(fulloutpath, "w");
+    if (!f)
+      panic("cannot open file %s for write", fulloutpath);
+    processfile(fullpath, f);
+    fclose(f);
+  }
+  closedir(dir);
+}
+
+
 void closetemplate(void *tpl)
 {
   close(((struct template *)tpl)->fd);
@@ -228,15 +264,15 @@ void closetemplate(void *tpl)
 void main(int argc, char *argv[])
 {
   struct template default_tpl;
-  struct hashtable *templates;
   
-  if (argc < 2)
-    panic("Use: %s <filenames>", argv[0]);
+  //if (argc < 2)
+  //  panic("Use: %s <filenames>", argv[0]);
   
-  templates = gettemplates(TEMPLATES_DIR);
+  gtemplates = gettemplates(TEMPLATES_DIR);
+  processcontent(CONTENT_DIR, OUTPUT_DIR);
   
-  for (int i=1; i < argc; i++)
-    processfile(argv[i], templates, stdout);
+  //for (int i=1; i < argc; i++)
+  //  processfile(argv[i], gtemplates, stdout);
   
   
   /* Close files */

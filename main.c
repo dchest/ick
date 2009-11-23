@@ -131,6 +131,8 @@ void processfile(char *filename, struct template *tpl, FILE *out)
       //printf("READ VARVALUE=%s\n", fvars.values[fvars.num]);
       fvars.num++;
     } else {
+      if (buf[i] == '\n') /* skip line feed after variables */
+        i++;
       break;
     }
   }
@@ -149,7 +151,7 @@ void processfile(char *filename, struct template *tpl, FILE *out)
       fprintf(out, "%s", fvars.values[v]); /* write variable value */
 
     else if (strstr(tpl->varnames[i], "if ") == tpl->varnames[i]) {
-      char *var = (char *)tpl->varnames[i] + 3; // if[space]
+      char *var = (char *)tpl->varnames[i] + 3; /* if[space] */
       //printf("VAR: %s", var);
       if (findfilevar(var, &fvars) == -1)
         skip = 1; 

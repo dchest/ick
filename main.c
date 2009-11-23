@@ -237,8 +237,15 @@ void processfile(char *filename, FILE *out)
       skip = 0;
 
     /* write after var */
-    if (!skip)
+    if (skip)
+      continue;
+    if (i < tpl->varnum-1) {
       fprintf(out, "%s", tpl->varplaces[i]);
+    } else {/* write remaining bytes. cannot fprintf, as buf doesn't end with 0. */
+      size_t rem = tpl->len - (tpl->varplaces[i] - tpl->buf);
+      printf("rem = %d\n", rem);
+      fwrite(tpl->varplaces[i], rem, 1, out);
+    }
   }  
   close(fd);
 }

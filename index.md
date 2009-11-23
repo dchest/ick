@@ -1,5 +1,5 @@
 =title This is a page
-=description keywords
+=description My description is so cool
 =date 2009-11-23
 
 <div>

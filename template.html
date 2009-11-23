@@ -2,10 +2,15 @@
 <html>
 <head>
 <title>{$title}</title>
+{$if keywords}<meta name="keywords" content="{$keywords}">{$endif}
+{$if description}<meta name="description" content="{$description}">{$endif}
 </head>
 
 <body>
 {$content}
 </body>
 {$nosuchvar}
+
+{$if title}<b>Here's title again: {$title}!</b>{$endif}
+
 </html>

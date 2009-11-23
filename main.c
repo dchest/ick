@@ -1,10 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <strings.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <dirent.h>
+#include <limits.h>
+
+#include "hashtable.h"
 
 /* Global constants */
 const char *templatefile = "template.html";
@@ -96,13 +101,14 @@ int findfilevar(char *var, struct filevars *fvars)
 }
 
 
-void processfile(char *filename, struct template *tpl, FILE *out)
+void processfile(char *filename, struct hashtable *templates, FILE *out)
 {
   int fd;
   char *buf;
   struct stat st;
   int skip = 0;
   struct filevars fvars;
+  struct template *tpl;
     
   fd = open(filename, O_RDONLY);
   if (fd < 0 || fstat(fd, &st))
@@ -149,9 +155,13 @@ void processfile(char *filename, struct template *tpl, FILE *out)
   if (v != -1) {
     /* Use custom template */
     //TODO: load from list of templates, don't read it here
-    struct template custom_tpl;
-    readtemplate(fvars.values[v], &custom_tpl); 
-    tpl = &custom_tpl;
+    printf("using custom template");
+    tpl = (struct template *)hashtable_search(templates, fvars.values[v]);
+  } else {
+    // Use default template
+    tpl = (struct template *)hashtable_search(templates, "default.html");
+    if (!tpl)
+      panic("no default template");
   }
     
   /* Output */
@@ -181,16 +191,54 @@ void processfile(char *filename, struct template *tpl, FILE *out)
   close(fd);
 }
 
+struct hashtable *gettemplates(char *path)
+{
+  DIR *dir;
+  struct dirent *ent;
+  char fullpath[PATH_MAX];
+  struct template *tpl;
+  struct hashtable *ht = create_hashtable_m(53);
+
+  dir = opendir(path);
+  if (!dir)
+    panic("cannot open directory %s", path);
+
+  while ((ent = readdir(dir)) != NULL) {
+    if ((ent->d_name[0] == '.') && (ent->d_name[1] == '\0' ||
+       ((ent->d_name[1] == '.') && (ent->d_name[2] == '\0')))
+       || ent->d_type == DT_DIR)
+       continue;
+
+    snprintf(fullpath, PATH_MAX, "%s/%s", path, ent->d_name);
+    tpl = malloc(sizeof(struct template));
+    readtemplate(fullpath, tpl);
+    hashtable_insert(ht, ent->d_name, tpl);
+  }
+  closedir(dir);
+  return ht;
+}
+
+void closetemplate(void *tpl)
+{
+  close(((struct template *)tpl)->fd);
+}
+
 void main(int argc, char *argv[])
 {
   struct template default_tpl;
+  struct hashtable *templates;
   
   if (argc < 2)
     panic("Use: %s <filenames>", argv[0]);
   
-  readtemplate(templatefile, &default_tpl);
-  for (int i=1; i < argc; i++)
-    processfile(argv[i], &default_tpl, stdout);
+  //readtemplate(templatefile, &default_tpl);
+  templates = gettemplates("templates");
   
-  close(default_tpl.fd);
+  for (int i=1; i < argc; i++)
+    processfile(argv[i], templates, stdout);
+  
+  
+  /* Close files */
+  //hashtable_iter(templates, closetemplate);
+  //hashtable_destroy(templates, 1);
 }

@@ -26,6 +26,7 @@
 #include <stdarg.h>
 #include <dirent.h>
 #include <limits.h>
+#include <copyfile.h>
 
 #include "hashtable.h"
 
@@ -33,7 +34,10 @@
 #define TEMPLATES_DIR "templates"
 #define CONTENT_DIR "content"
 #define OUTPUT_DIR "output"
-#define DEFAULT_TEMPLATE_FILENAME "default.html"
+#define DEFAULT_TEMPLATE "default.html"
+/* Predefined variables for templates */
+#define VAR_TEMPLATE "template"
+#define VAR_CONTENT  "content"
 
 struct template {
   int fd;     /* File descriptor */
@@ -100,6 +104,34 @@ void readtemplate(const char *filename, struct template *tpl)
     }
   }
 }
+
+struct hashtable *gettemplates(char *path)
+{
+  DIR *dir;
+  struct dirent *ent;
+  char fullpath[PATH_MAX];
+  struct template *tpl;
+  struct hashtable *ht = create_hashtable_m(53);
+
+  dir = opendir(path);
+  if (!dir)
+    panic("cannot open directory %s", path);
+
+  while ((ent = readdir(dir)) != NULL) {
+    if ((ent->d_name[0] == '.') && (ent->d_name[1] == '\0' ||
+       ((ent->d_name[1] == '.') && (ent->d_name[2] == '\0')))
+       || ent->d_type == DT_DIR)
+       continue;
+
+    snprintf(fullpath, PATH_MAX, "%s/%s", path, ent->d_name);
+    tpl = malloc(sizeof(struct template));
+    readtemplate(fullpath, tpl);
+    hashtable_insert(ht, strdup(ent->d_name), tpl);
+  }
+  closedir(dir);
+  return ht;
+}
+
 /* Search for variable in template. Currently not used
 int findtplvar(char *var, struct template *tpl)
 {
@@ -119,7 +151,6 @@ int findfilevar(char *var, struct filevars *fvars)
   }
   return -1;
 }
-
 
 void processfile(char *filename, FILE *out)
 {
@@ -171,7 +202,7 @@ void processfile(char *filename, FILE *out)
   
   int v;
   
-  v = findfilevar("template", &fvars);
+  v = findfilevar(VAR_TEMPLATE, &fvars);
   if (v != -1) {
     /* Use custom template */
     //TODO: load from list of templates, don't read it here
@@ -180,8 +211,7 @@ void processfile(char *filename, FILE *out)
       panic("unknown template '%s' in file '%s'", fvars.values[v], filename);
   } else {
     // Use default template
-    tpl = (struct template *)hashtable_search(gtemplates, 
-                                              DEFAULT_TEMPLATE_FILENAME);
+    tpl = (struct template *)hashtable_search(gtemplates, DEFAULT_TEMPLATE);
     if (!tpl)
       panic("no default template (file %s)", filename);
   }
@@ -190,7 +220,7 @@ void processfile(char *filename, FILE *out)
   fprintf(out, "%s", tpl->buf); /* write up to first variable */
   for (int i=0; i < tpl->varnum; i++) {
 
-    if (strcmp(tpl->varnames[i], "content") == 0)
+    if (strcmp(tpl->varnames[i], VAR_CONTENT) == 0)
       fwrite(buf, st.st_size, 1, out); /* write content */
 
     v = findfilevar(tpl->varnames[i], &fvars);
@@ -213,31 +243,20 @@ void processfile(char *filename, FILE *out)
   close(fd);
 }
 
-struct hashtable *gettemplates(char *path)
+/* Check if file has .ick extension, and remove it if it has. */
+/* Return 1 if has .ick extension, 0 if not. */
+int ickfile(char *filename)
 {
-  DIR *dir;
-  struct dirent *ent;
-  char fullpath[PATH_MAX];
-  struct template *tpl;
-  struct hashtable *ht = create_hashtable_m(53);
-
-  dir = opendir(path);
-  if (!dir)
-    panic("cannot open directory %s", path);
-
-  while ((ent = readdir(dir)) != NULL) {
-    if ((ent->d_name[0] == '.') && (ent->d_name[1] == '\0' ||
-       ((ent->d_name[1] == '.') && (ent->d_name[2] == '\0')))
-       || ent->d_type == DT_DIR)
-       continue;
-
-    snprintf(fullpath, PATH_MAX, "%s/%s", path, ent->d_name);
-    tpl = malloc(sizeof(struct template));
-    readtemplate(fullpath, tpl);
-    hashtable_insert(ht, strdup(ent->d_name), tpl);
+  size_t len = strlen(filename);
+  if (len > 4
+      && filename[len-4] == '.'
+      && filename[len-3] == 'i'
+      && filename[len-2] == 'c'
+      && filename[len-1] == 'k') {
+    filename[len-4] = '\0';
+    return 1;
   }
-  closedir(dir);
-  return ht;
+  return 0;
 }
 
 void processcontent(char *path, char *outpath)
@@ -248,6 +267,8 @@ void processcontent(char *path, char *outpath)
   char fullpath[PATH_MAX], fulloutpath[PATH_MAX];
   struct template *tpl;
   struct hashtable *ht = create_hashtable_m(53);
+  int isickfile;
+  size_t len;
 
   dir = opendir(path);
   if (!dir)
@@ -264,12 +285,24 @@ void processcontent(char *path, char *outpath)
       processcontent(fullpath, fulloutpath);
       continue;
     }
-
-    f = fopen(fulloutpath, "w");
-    if (!f)
-      panic("cannot open file %s for write", fulloutpath);
-    processfile(fullpath, f);
-    fclose(f);
+  
+    if (ickfile(fulloutpath)) {
+      // Process ick file
+      f = fopen(fulloutpath, "w");
+      if (!f)
+        panic("cannot open file %s for write", fulloutpath);
+      processfile(fullpath, f);
+      fclose(f);
+    } else {
+      // Just copy file
+      #ifdef __APPLE__
+      int flags = COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC;
+    	if (copyfile(fullpath, fulloutpath, NULL, flags) != 0)
+        panic("cannot copy file %s to %s", fullpath, fulloutpath);
+      #else
+      panic("copy is not yet implemented for this platform");
+      #endif
+    }
   }
   closedir(dir);
 }

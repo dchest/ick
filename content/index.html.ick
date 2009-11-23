@@ -1,0 +1,76 @@
+=title ick
+=description Stupid (but fast) static site generator written in C
+=date 	2009-11-23
+
+ick is a site generator written in C.
+
+<h2>Directory Structure</h2>
+
+	<li>content
+	<li>templates 
+	<li>output (will be created)
+
+<h2>Content Format</h2>
+
+Files from content directory are just copied to output unless they have
+<i>.ick</i> extension. In this case, they are processed by ick. After 
+processing, .ick extension is removed. For example, if you want <i>index.html</i>
+file in your output directory, name content file <i>index.html.ick</i>.
+
+<pre><code>
+=variable1 value1
+=variable2 value2
+
+content
+</code></pre>
+
+<h3>Predefined variables</h3>
+
+<b>In content files:</b>
+
+<p><code>template</code> -- use specified template file from templates directory 
+		   (example: =template custom.html)
+
+<p><b>In template files</b>
+	
+<p><code>content</code> -- output processed content of file.
+
+<h2>Template Format</h2>
+
+HTML format with variables (defined in content file):
+
+<p><code>{$variable}</code>
+
+<p>also can check if variable is defined:
+
+<p><code>{$if variable}...{$endif}</code>
+
+<h2>Examples</h2>
+	
+<p>Content file <b>content/index.html.ick</b>:
+
+<pre><code>
+=title  Welcome to my page!
+=author John Doe
+
+Hello, this is &lt;b>my&lt;/b> page.
+</code></pre>
+
+<p>Template <b>templates/default.html</b>:
+
+<pre><code>
+&lt;html>
+&lt;head>
+&lt;title>{$title}&lt;/title>
+&lt;/head>
+&lt;body>
+{$content}
+{$if author}Written by {$author}{$endif}
+&lt;/body>
+&lt;/html>
+</code></pre>
+
+
+
+
+<p>(You cannot nest if's)

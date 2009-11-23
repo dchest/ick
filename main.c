@@ -168,8 +168,12 @@ void main(int argc, char *argv[])
 {
   struct template default_tpl;
   
+  if (argc < 2)
+    panic("Use: %s <filenames>", argv[0]);
+  
   readtemplate(templatefile, &default_tpl);
-  processfile("index.md", &default_tpl, stdout);
+  for (int i=1; i < argc; i++)
+    processfile(argv[i], &default_tpl, stdout);
   
   close(default_tpl.fd);
 }

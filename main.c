@@ -173,7 +173,13 @@ void processfile(char *filename, FILE *out)
   fd = open(filename, O_RDONLY);
   if (fd < 0 || fstat(fd, &st))
     panic("cannot open file %s", filename);
-                
+  
+  if (st.st_size == 0) {
+    printf("(skipping zero-length file) ");
+    close(fd);
+    return;
+  }
+          
   buf = mmap(NULL, st.st_size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
   if (buf == MAP_FAILED)
     panic("mmap on file (%s) failed", filename);
@@ -297,7 +303,7 @@ void processcontent(char *path, char *outpath)
   int isick;
   size_t len;
   struct stat stin, stout;
-  int changed;
+  int outexists;
   struct utimbuf ut;
 
   dir = opendir(path);
@@ -319,10 +325,10 @@ void processcontent(char *path, char *outpath)
     isick = ickfile(fulloutpath);
     stat(fullpath, &stin);
 
-    if (!grebuild 
-        && stat(fulloutpath, &stout) == 0 
+    outexists = (stat(fulloutpath, &stout) == 0);
+    if (!grebuild &&  outexists
         && stin.st_mtime == stout.st_mtime) {
-      printf("N %s\n", fullpath); /* not changed */
+      printf("=  %s\n", fullpath); /* not changed */
       continue;
     }
   		
@@ -332,7 +338,10 @@ void processcontent(char *path, char *outpath)
       if (!f)
         panic("cannot open file %s for write", fulloutpath);
       processfile(fullpath, f);
-      printf("* %s\n", fullpath);
+      if (outexists)
+        printf("*  %s\n", fullpath);
+      else
+        printf("+  %s\n", fullpath);
       fclose(f);
       ut.actime  = stin.st_atime;
       ut.modtime = stin.st_mtime;
@@ -343,7 +352,10 @@ void processcontent(char *path, char *outpath)
       int flags = COPYFILE_ALL | COPYFILE_NOFOLLOW_SRC;
     	if (copyfile(fullpath, fulloutpath, NULL, flags) != 0)
         panic("cannot copy file %s to %s", fullpath, fulloutpath);
-      printf("> %s\n", fullpath);
+      if (outexists)
+        printf("*> %s\n", fullpath);
+      else
+        printf("+> %s\n", fullpath);      
       #else
       panic("copy is not yet implemented for this platform");
       #endif

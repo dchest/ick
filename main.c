@@ -30,6 +30,7 @@
 #include <copyfile.h>
 #endif
 #include <sys/time.h>
+#include <utime.h>
 
 #include "hashtable.h"
 #include "markup.h"
@@ -63,6 +64,7 @@ struct filevars {
 
 /* Global vars */
 struct hashtable *gtemplates;
+int grebuild; /* indicates whether to rebuild the whole output */
 
 void panic(char *fmt, ...)
 {
@@ -292,8 +294,11 @@ void processcontent(char *path, char *outpath)
   char fullpath[PATH_MAX], fulloutpath[PATH_MAX];
   struct template *tpl;
   struct hashtable *ht = create_hashtable_m(53);
-  int isickfile;
+  int isick;
   size_t len;
+  struct stat stin, stout;
+  int changed;
+  struct utimbuf ut;
 
   dir = opendir(path);
   if (!dir)
@@ -310,8 +315,18 @@ void processcontent(char *path, char *outpath)
       processcontent(fullpath, fulloutpath);
       continue;
     }
-  
-    if (ickfile(fulloutpath)) {
+    
+    isick = ickfile(fulloutpath);
+    stat(fullpath, &stin);
+
+    if (!grebuild 
+        && stat(fulloutpath, &stout) == 0 
+        && stin.st_mtime == stout.st_mtime) {
+      printf("N %s\n", fullpath); /* not changed */
+      continue;
+    }
+  		
+    if (isick) {
       // Process ick file
       f = fopen(fulloutpath, "w");
       if (!f)
@@ -319,6 +334,9 @@ void processcontent(char *path, char *outpath)
       processfile(fullpath, f);
       printf("* %s\n", fullpath);
       fclose(f);
+      ut.actime  = stin.st_atime;
+      ut.modtime = stin.st_mtime;
+      utime(fulloutpath, &ut);
     } else {
       // Just copy file
       #ifdef __APPLE__
@@ -342,8 +360,11 @@ void closetemplate(void *tpl)
 
 void main(int argc, char *argv[])
 {  
-  //if (argc < 2)
-  //  panic("Use: %s <filenames>", argv[0]);
+  grebuild = 0;
+  
+  if (argc > 1 && strcmp(argv[1], "rebuild") == 0)
+    grebuild = 1;
+  
   struct timeval tp;
   double start, end;
 

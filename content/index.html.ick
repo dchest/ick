@@ -170,7 +170,7 @@ ick will make *output/index.html*:
 &lt;title>Welcome to my page!/title>
 &lt;/head>
 &lt;body>
-&lt;p>Hello, this is &lt;my> page.&lt;/p>
+&lt;p>Hello, this is &lt;b>my&lt;/b> page.&lt;/p>
 &lt;p>Written by John Doe&lt;/p>
 &lt;/body>
 &lt;/html>

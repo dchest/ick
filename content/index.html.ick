@@ -82,9 +82,9 @@ content
 <h4>Predefined variables</h4>
 
 `template` -- use specified template file from templates directory 
-		   (example: =template custom.html).
+		   (example: `=template custom.html`).
 		
-`markup` -- set to `none` to disable markup.
+`markup` -- set to `none` to disable markup (example: `=markup none`).
 
 <h4>Horrible Markup Language</h4>
 
@@ -108,7 +108,7 @@ Note that all symbols must be on the same line.
 
 <h3>Template Format</h3>
 
-HTML format with ability to output variables defined in content files:
+HTML files with ability to output variables defined in content files:
 
 `{$variable}`
 
@@ -130,6 +130,8 @@ or compare variable to some text:
 *This is home page* if a content page has `=title Home page`).
 
 Nested `if`'s or other constructions are not allowed.
+
+Default template should be named `default.html`.
 
 <h4>Predefined variables</h4>
 

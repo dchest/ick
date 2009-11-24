@@ -7,8 +7,8 @@
 /* I suck in parsers.                        */
 
 char *blocktags[] = {"DIV", "PRE", "H1", "H2", "H3", "H4", "H5", "H6",
-                     "UL", "LI", "OL"};
-int blocktagscount = 10;
+                     "UL", "LI", "OL", "P"};
+int blocktagscount = 12;
 
 char *pretags[] = {"PRE"};
 int pretagscount = 1;
@@ -163,7 +163,8 @@ void markup(char *buf, size_t len, FILE *out)
         if (paragraph)
           fprintf(out, "</p>");
         /* find next tag */
-        if (!next_block_tag(buf, i+1, len, 0)) {
+        if (!next_block_tag(buf, i+1, len, 0)
+            && !next_block_tag(buf, i+1, len, 1)) {
           paragraph = 1;
           fprintf(out, "\n\n<p>");
           i++;

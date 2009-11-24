@@ -6,12 +6,12 @@
 /* Don't even try to fix it, rewrite!        */
 /* I suck in parsers.                        */
 
-char *blocktags[] = {"DIV", "PRE", "CODE", "H1", "H2", "H3", "H4", "H5", "H6",
+char *blocktags[] = {"DIV", "PRE", "H1", "H2", "H3", "H4", "H5", "H6",
                      "UL", "LI", "OL"};
-int blocktagscount = 11;
+int blocktagscount = 10;
 
-char *pretags[] = {"PRE", "CODE"};
-int pretagscount = 2;
+char *pretags[] = {"PRE"};
+int pretagscount = 1;
 
 int iswhitespace(char c)
 {
@@ -102,10 +102,10 @@ void markup(char *buf, size_t len, FILE *out)
       }
       if (inblock < 0) inblock = 0; /* just in case */
       if (inpre < 0) inpre = 0;
-      if (paragraph && inblock) {
-        fprintf(out, "</p>");
-        paragraph = 0;
-      }
+      //if (paragraph && inblock) {
+      //  fprintf(out, "</p>");
+      //  paragraph = 0;
+      //}
       break;
     case '>':
       intag = 0;
@@ -149,13 +149,13 @@ void markup(char *buf, size_t len, FILE *out)
             fprintf(out, "\">");
             fwrite(buf+i+1, j-i-1, 1, out); /* link text */
             fprintf(out, "</a>");
-            i = p + 1;
+            i = p;
             wrote = 1;
             break;
           }
-          if (wrote)
-            continue;
         }
+        if (wrote)
+          continue;
       }
       break;
     case '\n':

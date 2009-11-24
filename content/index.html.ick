@@ -84,7 +84,8 @@ content
 `template` -- use specified template file from templates directory 
 		   (example: `=template custom.html`).
 		
-`markup` -- set to `none` to disable markup (example: `=markup none`).
+`markup` -- set to `none` to disable markup (example: `=markup none`),
+			or set to `markdown` to use [Markdown format](markdown.html).
 
 <h4>Horrible Markup Language</h4>
 
@@ -105,6 +106,10 @@ Start new paragraph (`&lt;p&gt;`) = empty line.
 
 Currently there's no nested markup (i.e. no links inside `*bold*`, etc.)
 Note that all symbols must be on the same line.
+
+<h4>Markdown</h4>
+
+ick can be compiled with Markdown support. See [instructions](markdown.html).
 
 <h3>Template Format</h3>
 

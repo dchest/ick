@@ -1,0 +1,76 @@
+[echo ...Configuring for [markdown]
+Looking for cpp
+clang: warning: argument unused during compilation: '-traditional'
+CPP=[/Developer/usr/bin/cpp], CPPFLAGS=[]
+looking for install
+ (/usr/bin/install)
+checking out the C compiler
+/tmp/ngc35847.c:2:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+checking for "volatile" keyword
+checking for "const" keyword
+defining WORD & DWORD scalar types
+/tmp/pd35847.c:2:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+/tmp/ngc35847.c:3:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+/tmp/ngc35847.c:5:15: warning: incompatible integer to pointer conversion initializing 'int', expected 'char *'
+    char *a = basename("/a/test");
+              ^~~~~~~~~~~~~~~~~~~
+/tmp/ngc35847.c:6:15: warning: incompatible integer to pointer conversion initializing 'int', expected 'char *'
+    char *b = basename("/a/nother");
+              ^~~~~~~~~~~~~~~~~~~~~
+3 diagnostics generated.
+./configure.inc: line 1058: 35997 Segmentation fault      /tmp/ngc$$
+looking for header pwd.h
+looking for the getpwuid function
+/tmp/ngc35847.c:1:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+looking for the srandom function
+/tmp/ngc35847.c:1:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+looking for the random function
+/tmp/ngc35847.c:1:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+looking for the strcasecmp function
+/tmp/ngc35847.c:1:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+looking for the strncasecmp function
+/tmp/ngc35847.c:1:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+looking for the fchdir function
+/tmp/ngc35847.c:1:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main()
+^
+1 diagnostic generated.
+looking for header malloc.h
+test failed:  command was cc -c -o /tmp/doto35847.o /tmp/ngc35847.c
+output:
+/tmp/ngc35847.c:2:10: fatal error: 'malloc.h' file not found
+#include <malloc.h>
+         ^
+1 diagnostic generated.
+offending sources:
+/tmp/ngc35847.c:
+/* AC_CHECK_HEADERS */
+#include <malloc.h>
+main() { }
+sed is /usr/bin/sed
+generating Makefile
+generating version.c
+generating markdown.1

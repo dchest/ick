@@ -35,6 +35,10 @@
 #include "hashtable.h"
 #include "markup.h"
 
+#ifdef MARKDOWN
+#include "discount/mkdio.h"
+#endif
+
 /* Global constants */
 #define TEMPLATES_DIR "templates"
 #define CONTENT_DIR "content"
@@ -45,6 +49,17 @@
 #define VAR_CONTENT  "content"
 #define VAR_MARKUP  "markup"
 #define VAR_VALUE_NONE  "none"
+#ifdef MARKDOWN
+#define VAR_MARKUP_MARKDOWN "markdown"
+#endif
+
+enum {
+  MARKUP_NONE = 0,
+  MARKUP_HORRIBLE = 1,
+#ifdef MARKDOWN
+  MARKUP_MARKDOWN = 2,
+#endif
+};
 
 struct template {
   int fd;     /* File descriptor */
@@ -169,7 +184,7 @@ void processfile(char *filename, FILE *out)
   int skip = 0;
   struct filevars fvars;
   struct template *tpl;
-  int nomarkup = 0;
+  int usemarkup = MARKUP_HORRIBLE;
     
   fd = open(filename, O_RDONLY);
   if (fd < 0 || fstat(fd, &st))
@@ -219,24 +234,29 @@ void processfile(char *filename, FILE *out)
   
   int v;
   
+  /* What template to use? */
   v = findfilevar(VAR_TEMPLATE, &fvars);
   if (v != -1) {
-    /* Use custom template */
-    //TODO: load from list of templates, don't read it here
+    /* Custom template */
     tpl = (struct template *)hashtable_search(gtemplates, fvars.values[v]);
     if (!tpl)
       panic("unknown template '%s' in file '%s'", fvars.values[v], filename);
   } else {
-    // Use default template
+    /* Default template */
     tpl = (struct template *)hashtable_search(gtemplates, DEFAULT_TEMPLATE);
     if (!tpl)
       panic("no default template (file %s)", filename);
   }
   
+  /* What markup to use? */
   v = findfilevar(VAR_MARKUP, &fvars);
   if (v != -1) {
     if (strcmp(fvars.values[v], VAR_VALUE_NONE) == 0)
-      nomarkup = 1;
+      usemarkup = MARKUP_NONE;
+    #ifdef MARKDOWN
+    else if (strcmp(fvars.values[v], VAR_MARKUP_MARKDOWN) == 0)
+      usemarkup = MARKUP_MARKDOWN;
+    #endif
     else
       panic("Unknown markup '%s' in file %s", fvars.values[v], filename);
   }
@@ -246,10 +266,21 @@ void processfile(char *filename, FILE *out)
   for (int i=0; i < tpl->varnum; i++) {
 
     if (strcmp(tpl->varnames[i], VAR_CONTENT) == 0) {
-      if (nomarkup)
-        fwrite(buf, st.st_size, 1, out); /* write content */
-      else
-        markup(buf, st.st_size, out);
+      switch (usemarkup) {
+        case MARKUP_NONE:
+          fwrite(buf, st.st_size, 1, out); /* just write out content */
+          break;
+        case MARKUP_HORRIBLE:
+          markup(buf, st.st_size, out);
+          break;
+        #ifdef MARKDOWN
+        case MARKUP_MARKDOWN: {
+          MMIOT *doc = mkd_string(buf, st.st_size, MKD_NOHEADER);
+          markdown(doc, out, MKD_NOHEADER);
+          break;
+        }
+        #endif
+      }
     }
 
     v = findfilevar(tpl->varnames[i], &fvars);

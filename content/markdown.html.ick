@@ -1,0 +1,18 @@
+=title ick - Markdown
+=date 	2009-11-23
+=markup markdown
+
+ick comes with [discount](http://www.pell.portland.or.us/~orc/Code/discount/)
+Markdown processor. It's turned off by default.
+
+You can compile ick with Markdown support using the following command:
+
+	$ MARKDOWN=1 make
+	
+To use Markdown in your content files, declare `markup`:
+
+	=markup markdown
+	
+(Actually, this document is formatted with it.)
+
+[Home](./)

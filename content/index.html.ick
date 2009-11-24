@@ -24,7 +24,8 @@ You'll get `ick` executable. Copy it in your `$PATH` (for example,
 
 <h2>Usage</h2>
 
-Go to your site's directory and run the following command:
+Go to your site's directory (try ick's source directory -- it contains
+this documentation) and run the following command:
 
 `$ ick`
 

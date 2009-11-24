@@ -92,14 +92,14 @@ Content by default processed via the built-in Horrible Markup Language.
 
 Formatting:
 
-`*bold*` -> *bold*<br>
-`_italic_` -> _italic_<br>
-&#96;code&#96; -> `code`<br>
+`*bold*` &rarr; *bold*<br>
+`_italic_` &rarr; _italic_<br>
+&#96;code&#96; &rarr; `code`<br>
 
 Links: 
 
 `[Coding Robots](http://www.codingrobots.com)` 
--> [Coding Robots](http://www.codingrobots.com)
+&rarr; [Coding Robots](http://www.codingrobots.com)
 
 Start new paragraph (`&lt;p&gt;`) = empty line.
 

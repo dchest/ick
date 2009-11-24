@@ -2,18 +2,72 @@
 =description Stupid (but fast) static site generator written in C
 =date 	2009-11-23
 
-ick is a site generator written in C.
+ick is a site generator (à la [webby](http://webby.rubyforge.org/) or 
+[jekyll](http://github.com/mojombo/jekyll)) written in C. 
+It's stupid, but fast and tiny (~25 KB binary). It has no dependencies other
+than libc. Here's ick's bad documentation.
 
-<h2>Directory Structure</h2>
+
+<h2>Installation</h2>
+
+Get the latest source from [repository](http://github.com/dchest/ick/)
+(you can use [Git](http://www.git-scm.com) to clone it, or just download
+a tarball.)
+
+Then build it:
+
+`$ make`
+
+You'll get `ick` executable. Copy it in your `$PATH` (for example,
+`/usr/local/bin`) and you're done.
+
+
+<h2>Usage</h2>
+
+Go to your site's directory and run the following command:
+
+`$ ick`
+
+to build changed files.
+
+If you want to rebuild the whole site:
+
+`$ ick rebuild`
+
+That's it for now.
+
+On successful run ick will output something like this:
+
+<pre><code>
+=  css/style.css
+*  index.html.ick
+=  test.txt
+
+ Done in 0.011 sec
+ 3 files, 0 new, 1 modified
+</code></pre>
+
+"Icons" mean:
+
+= - file not modified<br>
+* - file modified<br>
++ - new file<br>
+
+When copying file instead of processing ">" is added to "icons",
+except when file wasn't changed.
+
+<h2>How it works</h2>
+
+<h3>Directory Structure</h3>
 
 	<li>content
 	<li>templates 
 	<li>output (will be created)
 
-<h2>Content Format</h2>
+<h3>Content Format</h3>
 
 Files from content directory are just copied to output unless they have
-_.ick_ extension. [In this case](http://www.codingrobots.com), they are processed by ick. After 
+_.ick_ extension. In this case they are processed by ick. After 
 processing, .ick extension is removed. For example, if you want _index.html_
 file in your output directory, name content file _index.html.ick_.
 
@@ -24,45 +78,63 @@ file in your output directory, name content file _index.html.ick_.
 content
 </code></pre>
 
-<h3>Predefined variables</h3>
-
-*In content files:*
+<h4>Predefined variables</h4>
 
 `template` -- use specified template file from templates directory 
 		   (example: =template custom.html).
 		
 `markup` -- set to `none` to disable markup.
 
-*In template files:*
+<h4>Horrible Markup Language</h4>
 
-`content` -- output processed content of file.
+Content by default processed via the built-in Horrible Markup Language.
 
-<h3>Horrible Markup Language</h3>
+Formatting:
 
-Content by default processed via built-in Horrible Markup Language.
+`*bold*` -> *bold*<br>
+`_italic_` -> _italic_<br>
+``code`` -> `code`<br>
 
-Rules are:
-<pre><code>
-Emphasis: *bold*, _italic_, `code`
-Links: [link text](http://example.com)
-New paragraph = double linefeed.
-</code></pre>
+Links: 
+
+`[Coding Robots](http://www.codingrobots.com)` 
+-> [Coding Robots](http://www.codingrobots.com)
+
+Start new paragraph (`&lt;p&gt;`) = empty line.
+
 Currently there's no nested markup (i.e. no links inside `*bold*`, etc.)
+Note that all symbols must be on the same line.
 
+<h3>Template Format</h3>
 
-<h2>Template Format</h2>
-
-[HTML](http://w3c.com) format with variables (defined in content file):
+HTML format with ability to output variables defined in content files:
 
 `{$variable}`
 
-also can check if variable is defined:
+(no spaces or other whitespace!) 
+
+Also can check if variable is defined:
 
 `{$if variable}...{$endif}`
 
-Nested `if`'s are not allowed.
+or not defined:
 
-<h2>Examples</h2>
+`{$ifnot variable}...{$endif}`
+
+or compare variable to some text:
+
+`{$ifeq variable text}...{$endif}`
+
+(Example: `{$ifeq title Home Page}This is home page{$endif}` will output
+*This is home page* if a content page has `=title Home page`).
+
+Nested `if`'s or other constructions are not allowed.
+
+<h4>Predefined variables</h4>
+
+`content` -- output processed content of file.
+
+<h3>Examples</h3>
 	
 Content file *content/index.html.ick*:
 
@@ -82,7 +154,29 @@ Template *templates/default.html*:
 &lt;/head>
 &lt;body>
 {$content}
-{$if author}Written by {$author}{$endif}
+{$if author}&lt;p>Written by {$author}&lt;p>{$endif}
 &lt;/body>
 &lt;/html>
 </code></pre>
+
+ick will make *output/index.html*:
+
+<pre><code>
+&lt;html>
+&lt;head>
+&lt;title>Welcome to my page!/title>
+&lt;/head>
+&lt;body>
+&lt;p>Hello, this is &lt;my> page.&lt;/p>
+&lt;p>Written by John Doe&lt;/p>
+&lt;/body>
+&lt;/html>
+</code></pre>
+
+
+<h2>Known Bugs</h2>
+
+Other than horrible markup parser:
+<ul>
+<li>Copy currently works only in Mac OS X
+</ul>

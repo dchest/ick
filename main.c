@@ -427,4 +427,5 @@ void main(int argc, char *argv[])
   /* Close files */
   //hashtable_iter(templates, closetemplate);
   //hashtable_destroy(templates, 1);
+  exit(0);
 }

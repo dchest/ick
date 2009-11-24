@@ -338,6 +338,8 @@ void processcontent(char *path, char *outpath)
       processcontent(fullpath, fulloutpath);
       continue;
     }
+    
+    char *printpath = fullpath + strlen(CONTENT_DIR) + 1;
 
     gnumfiles++;
     isick = ickfile(fulloutpath);
@@ -345,7 +347,7 @@ void processcontent(char *path, char *outpath)
     outexists = (stat(fulloutpath, &stout) == 0);
     if (!grebuild &&  outexists
         && stin.st_mtime == stout.st_mtime) {
-      printf("=  %s\n", fullpath); /* not changed */
+      printf("=  %s\n", printpath); /* not changed */
       continue;
     }
     if (outexists)
@@ -360,9 +362,9 @@ void processcontent(char *path, char *outpath)
         panic("cannot open file %s for write", fulloutpath);
       processfile(fullpath, f);
       if (outexists)
-        printf("*  %s\n", fullpath);
+        printf("*  %s\n", printpath);
       else
-        printf("+  %s\n", fullpath);
+        printf("+  %s\n", printpath);
       fclose(f);
       ut.actime  = stin.st_atime;
       ut.modtime = stin.st_mtime;
@@ -374,9 +376,9 @@ void processcontent(char *path, char *outpath)
     	if (copyfile(fullpath, fulloutpath, NULL, flags) != 0)
         panic("cannot copy file %s to %s", fullpath, fulloutpath);
       if (outexists)
-        printf("*> %s\n", fullpath);
+        printf("*> %s\n", printpath);
       else
-        printf("+> %s\n", fullpath);      
+        printf("+> %s\n", printpath);      
       #else
       panic("copy is not yet implemented for this platform");
       #endif

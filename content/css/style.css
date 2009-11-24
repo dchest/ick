@@ -1,2 +1,4 @@
 body { width: 80%; margin: auto; margin-bottom: 20px;}
 #footer { margin-top: 20px; color: #777; }
+pre { padding: 0px 10px 10px 10px; background: #f4f4f4; border: 1px solid #ddd;
+      color: #333;}

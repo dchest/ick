@@ -1,7 +1,6 @@
 =title ick
 =description Stupid (but fast) static site generator written in C
 =date 	2009-11-23
-=markup none
 
 ick is a site generator (à la [webby](http://webby.rubyforge.org/) or 
 [jekyll](http://github.com/mojombo/jekyll)) written in C. 

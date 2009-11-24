@@ -1,6 +1,7 @@
 =title ick
 =description Stupid (but fast) static site generator written in C
 =date 	2009-11-23
+=markup none
 
 ick is a site generator (à la [webby](http://webby.rubyforge.org/) or 
 [jekyll](http://github.com/mojombo/jekyll)) written in C. 
@@ -60,11 +61,11 @@ except when file wasn't changed.
 <h2>How it works</h2>
 
 <h3>Directory Structure</h3>
-
+<ul>
 	<li>content
 	<li>templates 
 	<li>output (will be created)
-
+</ul>
 <h3>Content Format</h3>
 
 Files from content directory are just copied to output unless they have

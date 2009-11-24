@@ -214,7 +214,8 @@ void processfile(char *filename, FILE *out)
       break;
     }
   }
-  buf = buf+i;
+  buf += i;
+  st.st_size -= i;
   
   int v;
   
@@ -285,7 +286,8 @@ void processfile(char *filename, FILE *out)
       continue;
     if (i < tpl->varnum-1) {
       fprintf(out, "%s", tpl->varplaces[i]);
-    } else {/* write remaining bytes. cannot fprintf, as buf doesn't end with 0. */
+    } 
+    else {/* write remaining bytes. cannot fprintf, as buf doesn't end with 0. */
       size_t rem = tpl->len - (tpl->varplaces[i] - tpl->buf);
       fwrite(tpl->varplaces[i], rem, 1, out);
     }

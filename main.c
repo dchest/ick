@@ -261,6 +261,22 @@ void processfile(char *filename, FILE *out)
       if (findfilevar(var, &fvars) == -1)
         skip = 1; 
     } 
+    else if (strstr(tpl->varnames[i], "ifnot ") == tpl->varnames[i]) {
+      char *var = (char *)tpl->varnames[i] + 7; /* unless[space] */
+      //printf("VAR: %s", var);
+      if (findfilevar(var, &fvars) != -1)
+        skip = 1; 
+    } 
+    else if (strstr(tpl->varnames[i], "ifeq ") == tpl->varnames[i]) {
+      char *text = strdup((char *)tpl->varnames[i] + 5); /* ifeq[space] */
+      char *var;
+      var = strsep(&text, " ");
+      //printf("VAR: %s\nTEXT: %s\n", var, text);
+      v = findfilevar(var, &fvars);
+      if (v == -1 || strcmp(fvars.values[v], text) != 0)
+        skip = 1; 
+      free(var);
+    } 
     else if (strcmp(tpl->varnames[i], "endif") == 0)
       skip = 0;
 

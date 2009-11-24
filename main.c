@@ -332,6 +332,10 @@ void processcontent(char *path, char *outpath)
     if ((ent->d_name[0] == '.') && (ent->d_name[1] == '\0' ||
        ((ent->d_name[1] == '.') && (ent->d_name[2] == '\0'))))
        continue;
+    
+    if (strcmp(ent->d_name, ".DS_Store") == 0)
+      continue; /* ignore crap */
+    
     snprintf(fullpath, PATH_MAX, "%s/%s", path, ent->d_name);
     snprintf(fulloutpath, PATH_MAX, "%s/%s", outpath, ent->d_name);
     if (ent->d_type == DT_DIR) {

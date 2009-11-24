@@ -7,8 +7,8 @@
 /* I suck in parsers.                        */
 
 char *blocktags[] = {"DIV", "PRE", "H1", "H2", "H3", "H4", "H5", "H6",
-                     "UL", "LI", "OL", "P"};
-int blocktagscount = 12;
+                     "UL", "LI", "OL", "P", "HR"};
+int blocktagscount = 13;
 
 char *pretags[] = {"PRE"};
 int pretagscount = 1;

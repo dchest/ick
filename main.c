@@ -49,8 +49,10 @@
 #define VAR_CONTENT  "content"
 #define VAR_MARKUP  "markup"
 #define VAR_VALUE_NONE  "none"
+#define VAR_VALUE_TRUE  "true"
 #ifdef MARKDOWN
 #define VAR_MARKUP_MARKDOWN "markdown"
+#define VAR_TOC "toc"
 #endif
 
 enum {
@@ -260,7 +262,7 @@ void processfile(char *filename, FILE *out)
     else
       panic("Unknown markup '%s' in file %s", fvars.values[v], filename);
   }
-    
+
   /* Output */
   fprintf(out, "%s", tpl->buf); /* write up to first variable */
   for (int i=0; i < tpl->varnum; i++) {
@@ -275,9 +277,16 @@ void processfile(char *filename, FILE *out)
           break;
         #ifdef MARKDOWN
         case MARKUP_MARKDOWN: {
-          MMIOT *doc = mkd_string(buf, st.st_size, MKD_NOHEADER);
-          markdown(doc, out, MKD_NOHEADER);
-          break;
+          MMIOT *doc = mkd_string(buf, st.st_size, MKD_NOHEADER|MKD_TOC);
+	  ////This doesn't work yet:
+	  //v = findfilevar(VAR_TOC, &fvars);
+	  //if (v != -1) {
+	  //  /* Generate table of contents from Markdown headers */
+	  //  mkd_generatetoc(doc, out);
+	  //} 
+	  markdown(doc, out, MKD_NOHEADER);
+          mkd_cleanup(doc);
+	  break;
         }
         #endif
       }

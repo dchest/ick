@@ -50,6 +50,7 @@ int next_tag(char *buf, size_t start, size_t len, char *tag, int closing)
     }
     return 0;
   }
+  return 0;
 }
 
 int next_tag_in_list(char *buf, size_t start, size_t len, 

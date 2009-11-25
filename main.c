@@ -357,10 +357,7 @@ void processcontent(char *path, char *outpath)
   FILE *f;
   struct dirent *ent;
   char fullpath[PATH_MAX], fulloutpath[PATH_MAX];
-  struct template *tpl;
-  struct hashtable *ht = create_hashtable_m(53);
   int isick;
-  size_t len;
   struct stat stin, stout;
   int outexists;
   struct utimbuf ut;
@@ -439,7 +436,7 @@ void closetemplate(void *tpl)
   close(((struct template *)tpl)->fd);
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {  
   gnumfiles = gnumchanged = gnumnew = 0;
   grebuild = 0;

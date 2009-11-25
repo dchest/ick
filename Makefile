@@ -1,11 +1,11 @@
 LIB =
-ifdef MARKDOWN
+#ifdef MARKDOWN
 LIB += -Ldiscount -lmarkdown
 FLAGS += -DMARKDOWN
-endif
+#endif
 
 all:
-	cc -Os -Wall $(LIB) $(FLAGS) hashtable.c markup.c main.c -o ick
+	cc -std=c99 -Os -Wall $(LIB) $(FLAGS) hashtable.c markup.c main.c -o ick
 
 clean:
 	rm ick

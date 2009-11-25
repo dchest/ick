@@ -285,7 +285,7 @@ void processfile(char *filename, FILE *out)
 	  //  mkd_generatetoc(doc, out);
 	  //} 
 	  markdown(doc, out, MKD_NOHEADER);
-          mkd_cleanup(doc);
+	  mkd_cleanup(doc);
 	  break;
         }
         #endif
